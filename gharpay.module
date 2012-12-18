@@ -1,0 +1,37 @@
+<?php
+
+/**
+ * @file
+ * Gharpay module.
+ */
+
+// Call gharpay PHP library here.
+
+/**
+ * Implements hook_permission().
+ */
+function gharpay_permission() {
+  return array(
+    'configure_gharpay' => array(
+      'title' => 'Configure Gharpay',
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function gharpay_menu() {
+
+  $items['admin/config/services/gharpay'] = array(
+    'title' => t('Configure Gharpay'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('gharpay_config_form'),
+    'access arguments' => array('configure_gharpay'),
+    'file' => 'gharpay.admin.inc',
+    'description' => 'Configure settings for Gharpay.',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}

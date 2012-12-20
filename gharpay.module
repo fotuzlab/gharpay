@@ -5,7 +5,17 @@
  * Gharpay module.
  */
 
-// Call gharpay PHP library here.
+// Implement hook_requirements();
+
+// Define constants.
+define('CREATE_ORDER_URL', 'http://services.gharpay.in/rest/GharpayService/createOrder');
+
+// @TODO: Add a check here.
+// Not storing username and password in database
+// for better security.
+// Let this activity be manual.
+// Later we can add it in .install workflow like Drupal.
+require_once(DRUPAL_ROOT . "/sites/all/libraries/gharpay/GharpayAPI.php");
 
 /**
  * Implements hook_permission().
@@ -14,6 +24,9 @@ function gharpay_permission() {
   return array(
     'configure_gharpay' => array(
       'title' => 'Configure Gharpay',
+    ),
+    'access_gharpay' => array(
+      'title' => 'Access Gharpay',
     ),
   );
 }
@@ -32,6 +45,100 @@ function gharpay_menu() {
     'description' => 'Configure settings for Gharpay.',
     'type' => MENU_NORMAL_ITEM,
   );
+  $items['gharpay/order/create'] = array(
+    'title' => t('Create order'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('gharpay_create_order_form'),
+    'access arguments' => array('access_gharpay'),
+    'file' => 'gharpay.create.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['gharpay/services/cities'] = array(
+    'title' => t('Available cities'),
+    'page callback' => 'gharpay_available_cities',
+    'access arguments' => array('access_gharpay'),
+    'type' => MENU_CALLBACK,
+  );
 
   return $items;
+}
+
+/**
+ * Check if Gharpay PHP library is available or not.
+ */
+function gharpay_library_status() {
+  // Here we use functions provided by libraries module
+  // so that it seemlessly integrates with multisite installation and
+  // dependency is catered well.
+  if (($library = libraries_detect('gharpay')) && !empty($library['installed'])) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+function gharpay_available_cities() {
+  $gharpay = new GharpayAPI();
+  $cities = $gharpay->getCityList();
+  $form = array();
+  foreach ($cities as $key => $city) {
+    $form[$city] = array(
+        '#type' => 'fieldset',
+        '#title' => t('@city', array('@city' => $city)),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      );
+    $form[$city][] = array(
+        '#type' => 'select',
+        '#title' => t('Available pincodes'),
+        '#options' => $gharpay->getPincodesInCity($city),
+      );
+  }
+  return $form;
+}
+
+/**
+ * Create an array of client details to pass to
+ * createOrder() function provided by Gharpay API
+ * @param
+ *   an array of user submitted form. Check API documentation for mandatory fields.
+ * @return
+ *   an array to pass to createOrder() function.
+ */
+function gharpay_create_order_client_details($order) {
+  // Create address.
+  $address = array();
+  $address[] = $order['delivery_company'];
+  // Should have already passed validation.
+  $address[] = $order['delivery_street1'];
+  $address[] = $order['delivery_street2'];
+  // Should have already passed validation.
+  $address[] = $order['delivery_city'];
+  // Should have already passed validation.
+  $address[] = $order['delivery_postal_code'];
+
+  // Convert address into a string
+  $address_string = implode(', ', $address);
+
+  $array = array();
+  // Mandatory fields.
+  // Should have already passed validation.
+  $array['customer_details'] = array(
+      'firstName' => $order['delivery_first_name'],
+      'contactNo' => $order['delivery_phone'],
+      'address' => $address_string,
+    );
+
+  // These are optional fields.
+  // They did not go under validation earlier.
+  if ($order['primary_email']) {
+    $array['customer_details']['email'] = $order['primary_email'];
+  }
+  if ($order['delivery_last_name']) {
+    $array['customer_details']['lastName'] = $order['delivery_last_name'];
+  }
+  if ($order['prefix']) {
+    $array['customer_details']['prefix'] = $order['prefix'];
+  }
 }

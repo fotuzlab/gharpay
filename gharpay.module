@@ -161,12 +161,12 @@ function gharpay_create_order_order_details($order) {
       // Should have already passed validation.
       'pincode' => $order['delivery_postal_code'],
       // Ubercart validation assumed.
-      'order_amount' => $order['delivery_phone'],
+      'orderAmount' => $order['order_total'],
       // Ubercart validation assumed.
-      'order_id' => $order['order_id'],
+      'clientOrderID' => $order['order_id'],
       // @TODO
       // Get delivary date from order.
-      'delivery_date' => '20-05-2017',
+      'deliveryDate' => '20-05-2013',
     );
 
   // These are optional fields.
@@ -201,11 +201,10 @@ function gharpay_create_order_product_details($order) {
     foreach ($order['products'] as $op_id => $product) {
       $array[$op_id] = array(
           'orderId' => $product->order_id,
-          'orderAmount' => '34',
           'productID' => $product->order_product_id,
           'productQuantity' => $product->qty,
           'unitCost' => $product->price,
-          'productDescription' => '$product->body',
+          'productDescription' => gharpay_get_order_description($product->nid),
         );
     }
     return $array;
@@ -213,4 +212,17 @@ function gharpay_create_order_product_details($order) {
   else {
     return FALSE;
   }
+}
+
+/**
+ * Ubercart does not provide product description in $order variable
+ * though node id is available.
+ * This function would extract node body field of the product node.
+ * @param
+ *   Node id of product.
+ * @return
+ *   Body field value of node.
+ */
+function gharpay_get_order_description($nid) {
+  return db_query("SELECT body_value FROM {field_data_body} WHERE entity_id = :nid", array(':nid' => $nid))->fetchField();
 }

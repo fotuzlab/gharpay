@@ -83,5 +83,5 @@ function gharpay_get_all_pincodes_cities() {
 }
 
 $test = new GharpayAPI();
-$test2 = $test->getPincodesInCity('mumbai');
+$test2 = $test->viewOrderDetails('GW-418-0018112-782');
 print_r($test2); die();

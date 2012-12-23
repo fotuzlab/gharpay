@@ -124,7 +124,7 @@ function gharpay_create_order_client_details($order) {
   $array = array();
   // Mandatory fields.
   // Should have already passed validation.
-  $array['customer_details'] = array(
+  $array = array(
       'firstName' => $order['delivery_first_name'],
       'contactNo' => $order['delivery_phone'],
       'address' => $address_string,
@@ -133,12 +133,84 @@ function gharpay_create_order_client_details($order) {
   // These are optional fields.
   // They did not go under validation earlier.
   if ($order['primary_email']) {
-    $array['customer_details']['email'] = $order['primary_email'];
+    $array['email'] = $order['primary_email'];
   }
   if ($order['delivery_last_name']) {
-    $array['customer_details']['lastName'] = $order['delivery_last_name'];
+    $array['lastName'] = $order['delivery_last_name'];
   }
   if ($order['prefix']) {
-    $array['customer_details']['prefix'] = $order['prefix'];
+    $array['prefix'] = $order['prefix'];
+  }
+
+  return $array;
+}
+
+/**
+ * Create an array of order details to pass to
+ * createOrder() function provided by Gharpay API
+ * @param
+ *   an array of user submitted form. Check API documentation for mandatory fields.
+ * @return
+ *   an array to pass to createOrder() function.
+ */
+function gharpay_create_order_order_details($order) {
+
+  $array = array();
+  // Mandatory fields.
+  $array = array(
+      // Should have already passed validation.
+      'pincode' => $order['delivery_postal_code'],
+      // Ubercart validation assumed.
+      'order_amount' => $order['delivery_phone'],
+      // Ubercart validation assumed.
+      'order_id' => $order['order_id'],
+      // @TODO
+      // Get delivary date from order.
+      'delivery_date' => '20-05-2017',
+    );
+
+  // These are optional fields.
+  // They did not go under validation earlier.
+  if ($order['template_id']) {
+    $array['template_id'] = $order['template_id'];
+  }
+  if ($order['payment_mode']) {
+    $array['payment_mode'] = $order['payment_mode'];
+  }
+
+  // @TODO
+  // Leaving Additional information intentionally.
+  // This would be added via a hook later.
+
+  return $array;
+}
+
+/**
+ * Create an array of product details to pass to
+ * createOrder() function provided by Gharpay API
+ * @param
+ *   an array of user submitted form. Check API documentation for mandatory fields.
+ * @return
+ *   an array to pass to createOrder() function if products are available
+ *   FALSE otherwise.
+ */
+function gharpay_create_order_product_details($order) {
+  $array = array();
+  // Check if products exist.
+  if ($order['products']) {
+    foreach ($order['products'] as $op_id => $product) {
+      $array[$op_id] = array(
+          'orderId' => $product->order_id,
+          'orderAmount' => '34',
+          'productID' => $product->order_product_id,
+          'productQuantity' => $product->qty,
+          'unitCost' => $product->price,
+          'productDescription' => '$product->body',
+        );
+    }
+    return $array;
+  }
+  else {
+    return FALSE;
   }
 }

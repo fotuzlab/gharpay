@@ -3,5 +3,4 @@ description = Provides Cash Before Delivery payment facility offered by gharpay.
 core = 7.x
 files[] = gharpay.module
 files[] = gharpay.install
-files[] = gharpay.inc
-dependencies[] = libraries
+files[] = gharpay.admin.inc

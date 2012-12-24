@@ -10,13 +10,16 @@
  */
 function gharpay_config_form($form, &$form_state) {
 
+  // Allow only India based transactions.
   $form['gharpay_allow_only_in_india'] = array(
     '#type' => 'checkbox',
     '#title' => t("Pay using Gharpay only in India"),
     '#default_value' => variable_get('gharpay_allow_only_in_india', 0),
     '#description' => t("If selected, users only from India would be allowed to pay using Gharpay."),
     );
-  $default_gharpay_description = t("//TODO: Add some default text here");
+
+  $default_gharpay_description = t("Gharpay has an Indian network of executives to reach customer's doorsteps and accept payments.");
+  // Add a description about Gharpay.
   $form['gharpay_description'] = array(
     '#type' => 'textarea',
     '#title' => t("Help text"),
@@ -25,11 +28,4 @@ function gharpay_config_form($form, &$form_state) {
     );
 
   return system_settings_form($form);
-}
-
-/**
- * Submit handler for gharpay configuration form.
- */
-function imagenode_add_preset_configure_submit($form, &$form_state) {
-  // Code here.
 }

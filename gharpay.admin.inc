@@ -9,6 +9,7 @@
  * Configuration form for Gharpay.
  */
 function gharpay_config_form() {
+  
   $form = array();
 
   // Allow only India based transactions.

@@ -40,7 +40,6 @@ function gharpay_config_form($form, &$form_state) {
     );
   $form['gharpay_surcharge_in_rs'] = array(
     '#type' => 'textfield',
-    '#required' => TRUE,
     '#title' => t('Value'),
     '#default_value' => variable_get('gharpay_surcharge_in_rs', ''),
     '#states' => array(
@@ -51,7 +50,6 @@ function gharpay_config_form($form, &$form_state) {
     );
   $form['gharpay_surcharge_in_percent'] = array(
     '#type' => 'textfield',
-    '#required' => TRUE,
     '#title' => t('Value'),
     '#default_value' => variable_get('gharpay_surcharge_in_percent', ''),
     '#states' => array(

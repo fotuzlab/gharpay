@@ -9,11 +9,18 @@
 // for better security.
 // Let this activity be manual.
 
+// Set Gharapay API and password.
+define('GP_API', variable_get('gharpay_api_key', ''));
+define('GP_PASSWORD', variable_get('gharpay_password', ''));
+define('GP_SERVICE_URL', variable_get('gharpay_service_url', ''));
+
 // Check if library exists. Though already defined in hook_requirements()
 // its a double check.
 $gharpay_library = DRUPAL_ROOT . "/sites/all/libraries/gharpay/GharpayAPI.php";
 if (file_exists($gharpay_library)) {
-  require_once($gharpay_library);  
+  require_once($gharpay_library);
+  // Include dependent files.
+  require_once(DRUPAL_ROOT . "/" . drupal_get_path('module', 'gharpay') . "/gharpay.class.php"); 
 }
 else {
   drupal_set_message(t("Gharapay PHP library is either missing or named incorrectly. Check README.txt for details."), "error");
@@ -42,11 +49,24 @@ function gharpay_menu() {
   $items['admin/config/services/gharpay'] = array(
     'title' => t('Configure Gharpay'),
     'page callback' => 'drupal_get_form',
+    'page arguments' => array('gharpay_credentials_form'),
+    'access arguments' => array('configure_gharpay'),
+    'file' => 'gharpay.credentials.inc',
+    'description' => 'Configure credentials for Gharpay.',
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['admin/config/services/gharpay/configure'] = array(
+    'title' => t('Configure Gharpay'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/config/services/gharpay/settings'] = array(
+    'title' => t('Gharpay settings'),
+    'page callback' => 'drupal_get_form',
     'page arguments' => array('gharpay_config_form'),
     'access arguments' => array('configure_gharpay'),
     'file' => 'gharpay.admin.inc',
     'description' => 'Configure settings for Gharpay.',
-    'type' => MENU_NORMAL_ITEM,
+    'type' => MENU_LOCAL_TASK,
   );
   $items['gharpay/services/cities'] = array(
     'title' => t('Available cities'),
@@ -63,7 +83,7 @@ function gharpay_menu() {
  * where Gharpay provides its services.
  */
 function gharpay_available_cities() {
-  $gharpay = new GharpayAPI();
+  $gharpay = new GpGharpayAPI();
   $cities = $gharpay->getCityList();
   $form = array();
   foreach ($cities as $key => $city) {

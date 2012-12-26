@@ -57,7 +57,7 @@ function uc_gharpay_uc_payment_method_callback($op, &$order, $form = NULL, &$for
         // Can not make them mandatory through hook_form_alter() as there might be some other payment
         // methods those do not require them.
 
-        $gharpay = new GharpayAPI();
+        $gharpay = new GpGharpayAPI();
 
         // Get city. Mandatory.
         $city = !empty($order->delivery_city) ? $gharpay->isCityPresent($order->delivery_city) : NULL;
@@ -138,7 +138,7 @@ function uc_gharpay_uc_payment_method_callback($op, &$order, $form = NULL, &$for
 function uc_gharpay_uc_order($op, $order, $arg2) {
   switch ($op) {
     case 'submit':
-      $gharpay = new GharpayAPI();
+      $gharpay = new GpGharpayAPI();
 
       // Get array of customer details.
       $customer_details = gharpay_create_order_client_details($order);

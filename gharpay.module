@@ -5,11 +5,7 @@
  * Gharpay module.
  */
 
-// Not storing username and password in database
-// for better security.
-// Let this activity be manual.
-
-// Set Gharapay API and password.
+// Set Gharapay API, password and Service url.
 define('GP_API', variable_get('gharpay_api_key', ''));
 define('GP_PASSWORD', variable_get('gharpay_password', ''));
 define('GP_SERVICE_URL', variable_get('gharpay_service_url', ''));
@@ -45,6 +41,8 @@ function gharpay_permission() {
  * Implements hook_menu().
  */
 function gharpay_menu() {
+
+  $items = array();
 
   $items['admin/config/services/gharpay'] = array(
     'title' => t('Configure Gharpay'),

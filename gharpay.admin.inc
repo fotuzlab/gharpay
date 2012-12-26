@@ -10,6 +10,8 @@
  */
 function gharpay_config_form($form, &$form_state) {
 
+  $form = array();
+
   // Allow only India based transactions.
   $form['gharpay_allow_only_in_india'] = array(
     '#type' => 'checkbox',

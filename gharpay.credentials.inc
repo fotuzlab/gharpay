@@ -10,6 +10,8 @@
  */
 function gharpay_credentials_form($form, &$form_state) {
 
+  $form = array();
+
   // Add a description about Gharpay.
   $form['gharpay_api_key'] = array(
     '#type' => 'textfield',

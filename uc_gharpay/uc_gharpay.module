@@ -15,7 +15,7 @@ function uc_gharpay_payment_method() {
     'name' => t('Gharpay'), 
     'title' => t('Pay using Gharpay<br /><i>%desc</i>', array('%desc' => variable_get('gharpay_description', ''))), 
     'desc' => variable_get('gharpay_description', ''), 
-    'callback' => 'uc_gharpay_uc_payment_method_callback', 
+    'callback' => 'uc_gharpay_payment_method_callback', 
     'weight' => 1, 
     'checkout' => TRUE,
     'no_gateway' => TRUE,
@@ -40,12 +40,12 @@ function uc_gharpay_payment_method_callback($op, &$order, $silent = FALSE) {
         // Can not make them mandatory through hook_form_alter() as there might be some other payment
         // methods those do not require them.
 
-        $gharpay = new GharpayAPI();
+        $gharpay = new GpGharpayAPI();
 
         // Get city. Mandatory.
-        $city = !empty($order->delivery_city) ? $gharpay->isCityPresent($order->delivery_city) : NULL;
+        $city = !empty($order->delivery_city) ? ($gharpay->isCityPresent($order->delivery_city) == 1 ? $order->delivery_city : NULL) : NULL;
         // Get pincode. Mandatory.
-        $pincode = !empty($order->delivery_postal_code) ? $gharpay->isPincodePresent($order->delivery_postal_code) : NULL;
+        $pincode = !empty($order->delivery_postal_code) ? ($gharpay->isPincodePresent($order->delivery_postal_code) == 1 ? $order->delivery_postal_code : NULL) : NULL;
         // Get first name. Mandatory.
         $first_name = !empty($order->delivery_first_name) ? $order->delivery_first_name : NULL;
         // Get contact number. Mandatory.
@@ -107,7 +107,7 @@ function uc_gharpay_payment_method_callback($op, &$order, $silent = FALSE) {
 function uc_gharpay_order($op, $order, $arg2) {
   switch ($op) {
     case 'submit':
-      $gharpay = new GharpayAPI();
+      $gharpay = new GpGharpayAPI();
 
       // Get array of customer details.
       $customer_details = gharpay_create_order_client_details($order);

@@ -16,6 +16,7 @@ function gharpay_credentials_form($form) {
   $form['gharpay_api_key'] = array(
     '#type' => 'textfield',
     '#title' => t("API KEY"),
+    '#required' => TRUE,
     '#description' => t("Enter the Api Key provided by gharpay.in"),
     '#default_value' => variable_get('gharpay_api_key', ''),
     );
@@ -23,6 +24,7 @@ function gharpay_credentials_form($form) {
   $form['gharpay_password'] = array(
     '#type' => 'password',
     '#title' => t("PASSWORD"),
+    '#required' => TRUE,
     '#description' => t("Enter your gharpay.in password."),
     '#default_value' => variable_get('gharpay_password', ''),
     );
@@ -30,6 +32,7 @@ function gharpay_credentials_form($form) {
   $form['gharpay_service_url'] = array(
     '#type' => 'textfield',
     '#title' => t("SERVICE URL"),
+    '#required' => TRUE,
     '#description' => t("Enter the service url."),
     '#default_value' => variable_get('gharpay_service_url', 'http://services.gharpay.in'),
     );

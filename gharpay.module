@@ -77,7 +77,7 @@ function gharpay_menu() {
  * where Gharpay provides its services.
  */
 function gharpay_available_cities() {
-  $gharpay = new GharpayAPI();
+  $gharpay = new GpGharpayAPI();
   $cities = $gharpay->getCityList();
   $form = array();
   foreach ($cities as $key => $city) {
@@ -93,7 +93,7 @@ function gharpay_available_cities() {
         '#options' => $gharpay->getPincodesInCity($city),
       );
   }
-  return $form;
+  return drupal_render($form);
 }
 
 /**

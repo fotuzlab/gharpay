@@ -1,6 +1,3 @@
 name = Gharpay
 description = Provides Cash Before Delivery payment facility offered by gharpay.in
-core = 7.x
-files[] = gharpay.module
-files[] = gharpay.install
-files[] = gharpay.admin.inc
+core = 6.x

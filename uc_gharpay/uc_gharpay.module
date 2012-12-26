@@ -7,12 +7,13 @@
  */
 
 /**
- * Implements hook_uc_payment_method().
+ * Implements hook_payment_method().
  */
-function uc_gharpay_uc_payment_method() {
+function uc_gharpay_payment_method() {
   $methods['gharpay'] = array(
+    'id' => 'gharpay',
     'name' => t('Gharpay'), 
-    'title' => t('Pay using Gharpay'), 
+    'title' => t('Pay using Gharpay<br /><i>%desc</i>', array('%desc' => variable_get('gharpay_description', ''))), 
     'desc' => variable_get('gharpay_description', ''), 
     'callback' => 'uc_gharpay_uc_payment_method_callback', 
     'weight' => 1, 
@@ -23,18 +24,13 @@ function uc_gharpay_uc_payment_method() {
 }
 
 /**
- * Callback for uc_gharpay_uc_payment_method().
+ * Callback for uc_gharpay_payment_method().
  */
-function uc_gharpay_uc_payment_method_callback($op, &$order, $form = NULL, &$form_state = NULL) {
-  
+function uc_gharpay_payment_method_callback($op, &$order, $silent = FALSE) {
   switch ($op) {
     case 'cart-details':
-      // Display description about Gharpay.
-      $form['gharpay_description'] = array(
-          '#markup' => variable_get('gharpay_description', ''),
-        );
-
-      return $form['gharpay_description'];
+      // @TODO: return markup not working here.
+      // Add description with gharpay.
       break;
 
     case 'cart-process':
@@ -44,7 +40,7 @@ function uc_gharpay_uc_payment_method_callback($op, &$order, $form = NULL, &$for
         // Can not make them mandatory through hook_form_alter() as there might be some other payment
         // methods those do not require them.
 
-        $gharpay = new GpGharpayAPI();
+        $gharpay = new GharpayAPI();
 
         // Get city. Mandatory.
         $city = !empty($order->delivery_city) ? $gharpay->isCityPresent($order->delivery_city) : NULL;
@@ -58,8 +54,6 @@ function uc_gharpay_uc_payment_method_callback($op, &$order, $form = NULL, &$for
         $address = !empty($order->delivery_street1) ? $order->delivery_street1 : NULL;
         // Get country code. Mandatory.
         $country = !empty($order->delivery_country) ? $order->delivery_country : '';
-        // Get delivery date.
-        $delivery_date = !empty($form_state['values']['panes']['payment']['details']['0']) ? $form_state['values']['panes']['payment']['details']['0'] : NULL;
 
         // Check if pincode or city are left out or
         // Gharpay does not have service in that area.
@@ -108,12 +102,12 @@ function uc_gharpay_uc_payment_method_callback($op, &$order, $form = NULL, &$for
 }
 
 /**
- * Implements hook_uc_order().
+ * Implements hook_order().
  */
-function uc_gharpay_uc_order($op, $order, $arg2) {
+function uc_gharpay_order($op, $order, $arg2) {
   switch ($op) {
     case 'submit':
-      $gharpay = new GpGharpayAPI();
+      $gharpay = new GharpayAPI();
 
       // Get array of customer details.
       $customer_details = gharpay_create_order_client_details($order);

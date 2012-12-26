@@ -8,7 +8,7 @@
 /**
  * Configuration form for Gharpay credentials.
  */
-function gharpay_credentials_form($form, &$form_state) {
+function gharpay_credentials_form($form) {
 
   // Add a description about Gharpay.
   $form['gharpay_api_key'] = array(

@@ -10,7 +10,7 @@
  */
 function gharpay_requirements($phase) {
   if ($phase == 'install' || $phase == 'runtime') {
-    $gharpay_api_file = DRUPAL_ROOT . "/sites/all/libraries/gharpay/GharpayAPI.php";
+    $gharpay_api_file = "./sites/all/libraries/gharpay/GharpayAPI.php";
     $requirements = array();
     if (file_exists($gharpay_api_file) == FALSE) {
       $requirements['gharpay'] = array(

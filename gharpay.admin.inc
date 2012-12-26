@@ -8,7 +8,8 @@
 /**
  * Configuration form for Gharpay.
  */
-function gharpay_config_form($form, &$form_state) {
+function gharpay_config_form() {
+  $form = array();
 
   // Allow only India based transactions.
   $form['gharpay_allow_only_in_india'] = array(
@@ -26,37 +27,12 @@ function gharpay_config_form($form, &$form_state) {
     '#description' => t("Describe Gharpay's payment method. This would be shown to the customers. <i>Leave blank for no description</i>"),
     '#default_value' => variable_get('gharpay_description', $default_gharpay_description),
     );
-  // @TODO: Add a function to process surcharge.
-  $form['gharpay_surcharge_unit'] = array(
-    '#type' => 'radios',
+  // Need to add processing function for this field.
+  $form['gharpay_surcharge'] = array(
+    '#type' => 'textfield',
     '#title' => t("Surcharge"),
-    '#description' => t("Optional."),
-    '#default_value' => variable_get('gharpay_surcharge_unit', 'none'),
-    '#options' => array(
-        'none' => t("None"),
-        'rs' => t("In Rs."),
-        'percent' => t("Percent of total payment"),
-      ),
-    );
-  $form['gharpay_surcharge_in_rs'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Value'),
-    '#default_value' => variable_get('gharpay_surcharge_in_rs', ''),
-    '#states' => array(
-      'visible' => array(
-        'input[name="gharpay_surcharge_unit"]' => array('value' => 'rs'),
-        ),
-      ),
-    );
-  $form['gharpay_surcharge_in_percent'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Value'),
-    '#default_value' => variable_get('gharpay_surcharge_in_percent', ''),
-    '#states' => array(
-      'visible' => array(
-        'input[name="gharpay_surcharge_unit"]' => array('value' => 'percent'),
-        ),
-      ),
+    '#default_value' => variable_get('gharpay_surcharge', ''),
+    '#description' => t("Add value in % or Rs. <i>e.g. 5% for value in percent or only 5 for value in Rs.</i>"),
     );
 
   return system_settings_form($form);

@@ -1,7 +1,6 @@
 name = Gharpay for Ubercart
 description = Provides Gharpay payment method integration with Ubercart
-core = 7.x
-files[] = uc_gharpay.module
+core = 6.x
 dependencies[] = gharpay
 dependencies[] = uc_order
 dependencies[] = uc_payment

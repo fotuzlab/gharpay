@@ -15,7 +15,7 @@ function gharpay_requirements($phase) {
     if (file_exists($gharpay_api_file) == FALSE) {
       $requirements['gharpay'] = array(
           'title' => t("Gharpay"),
-          'description' => t("Gharapay PHP library is either missing or named incorrectly. Check README.txt for details."),
+          'description' => t("Gharpay PHP library is either missing or named incorrectly. Check README.txt for details."),
           'severity' => REQUIREMENT_ERROR,
         );
       return $requirements;

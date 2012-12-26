@@ -156,7 +156,7 @@ function gharpay_create_order_order_details($order) {
       'clientOrderID' => $order->order_id,
       // @TODO
       // Get delivary date from order.
-      'deliveryDate' => $order->data['delivery_date'],
+      'deliveryDate' => date("d-m-Y"),
     );
 
   // These are optional fields.
@@ -197,7 +197,7 @@ function gharpay_create_order_product_details($order) {
           'unitCost' => $product->price,
           // Need to pass default value for product description
           // else GharpayAPI would throw an exception.
-          'productDescription' => $product_description ? $product_description : t("No description provided"),
+          'productDescription' => $product_description ? $product->title . ": " . $product_description : $product->title,
         );
     }
     return $array;

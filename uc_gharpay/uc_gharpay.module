@@ -26,28 +26,15 @@ function uc_gharpay_uc_payment_method() {
  * Callback for uc_gharpay_uc_payment_method().
  */
 function uc_gharpay_uc_payment_method_callback($op, &$order, $form = NULL, &$form_state = NULL) {
+  
   switch ($op) {
     case 'cart-details':
-      // Show a field to user to enter delivery date.
-      // This field is Gharpay specific, hence would show
-      // only if gharpay is selected as payment method.
-      $form['gharpay_delivery_date'] = array(
-          '#type' => 'textfield',
-          '#required' => TRUE,
-          '#description' => t('Enter date in format DD-MM-YYYY'),
-          '#title' => t('Delivery date'),
-        );
       // Display description about Gharpay.
       $form['gharpay_description'] = array(
           '#markup' => variable_get('gharpay_description', ''),
         );
-      
-      // Keep delivery date on top.
-      // Changing the sequence would change the sequesnce at $form_state['values']['panes']['payment']['details']
-      // used below.
-      $fields[] = $form['gharpay_delivery_date'];
-      $fields[] = $form['gharpay_description'];
-      return $fields;
+
+      return $form['gharpay_description'];
       break;
 
     case 'cart-process':
@@ -114,18 +101,6 @@ function uc_gharpay_uc_payment_method_callback($op, &$order, $form = NULL, &$for
           drupal_set_message(t("Gharpay transactions require delivery address."), "error");
           return FALSE;
         }
-
-        // Validate delivery date is filled.
-        if ($delivery_date == NULL) {
-          // The field is already mandatory. Commenting out error below.
-          // drupal_set_message(t("Gharpay transactions require delivery date."), "error");
-          return FALSE;
-        }
-        else {
-          // Set delivery date in the order object.
-          $order->data['delivery_date'] = $delivery_date;
-        }
-
 
       }
       break;

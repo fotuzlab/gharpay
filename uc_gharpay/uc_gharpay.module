@@ -13,7 +13,7 @@ function uc_gharpay_payment_method() {
   $methods['gharpay'] = array(
     'id' => 'gharpay',
     'name' => t('Gharpay'), 
-    'title' => t('Pay using Gharpay<br /><i>%desc</i>', array('%desc' => variable_get('gharpay_description', ''))), 
+    'title' => t('Pay using Gharpay<br /><i>%desc</i><br />%surcharge', array('%desc' => variable_get('gharpay_description', ''), '%surcharge' => gharpay_display_surcharge())), 
     'desc' => variable_get('gharpay_description', ''), 
     'callback' => 'uc_gharpay_payment_method_callback', 
     'weight' => 1, 
@@ -35,6 +35,14 @@ function uc_gharpay_payment_method_callback($op, &$order, $silent = FALSE) {
 
     case 'cart-process':
       if ($order->payment_method == 'gharpay') {
+        // Check if username, password and service url is set.
+        $apikey = variable_get('gharpay_api_key', '');
+        $password = variable_get('gharpay_password', '');
+        if (!isset($apikey) || !isset($password) || empty($apikey) || empty($password)) {
+          drupal_set_message("There is some problem with Gharpay payment method. Please try any other payment mode.", "error");
+          watchdog("gharpay", "Username or password missing.", NULL, WATCHDOG_ERROR);
+          return FALSE;
+        }
         // There are some mandatory fields requested by Gharpay API.
         // Validate.
         // Can not make them mandatory through hook_form_alter() as there might be some other payment
@@ -60,7 +68,7 @@ function uc_gharpay_payment_method_callback($op, &$order, $silent = FALSE) {
         if ($pincode == NULL || $city == NULL) {
           // Set message.
           drupal_set_message(
-            t("Gharpay doesn't provide its services in selected city. Kindly select another city or see the list of available cities !here.",
+            t("Gharpay doesn't provide its services in the given pincode region. Kindly select another city or see the list of available cities !here.",
             array(
               "!here" => l("here", "gharpay/services/cities", array("attributes" => array("target" => "_blank")))
               )
@@ -89,6 +97,15 @@ function uc_gharpay_payment_method_callback($op, &$order, $silent = FALSE) {
           drupal_set_message(t("Gharpay transactions require delivery contact number."), "error");
           return FALSE;
         }
+        else {
+          // Check if contact number is all numeric and
+          // counts to 10 digits.
+          $contact_num_len = strlen($contact_no);
+          if (!is_numeric($contact_no) || $contact_num_len != 10) {
+            drupal_set_message("The phone number seems invalid.", "error");
+            return FALSE;
+          }
+        }
 
         // Validate address is filled.
         if ($address == NULL) {
@@ -98,6 +115,10 @@ function uc_gharpay_payment_method_callback($op, &$order, $silent = FALSE) {
 
       }
       break;
+    case 'cart-review':
+      return array(
+          gharpay_display_surcharge(),
+        );
   }
 }
 

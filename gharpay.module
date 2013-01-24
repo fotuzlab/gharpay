@@ -107,6 +107,7 @@ function gharpay_available_cities() {
 function gharpay_create_order_client_details($order) {
 
   $array = array();
+
   // Mandatory fields.
   // Should have already passed validation.
   $array = array(
@@ -211,4 +212,25 @@ function gharpay_create_order_product_details($order) {
  */
 function gharpay_get_order_description($nid) {
   return db_result(db_query("SELECT body FROM {node_revisions} WHERE nid = %d", $nid));
+}
+
+/**
+ * Format the surcharge display text.
+ */
+function gharpay_display_surcharge() {
+  $surcharge = variable_get('gharpay_surcharge', '');
+  if (empty($surcharge)) {
+    return '';
+  }
+  // Trim all the white spaces.
+  $surcharge = preg_replace('/\s+/', '', $surcharge);
+
+  // Check if the amount is in percent or units.
+  $s_unit = substr($surcharge, -1);
+  if ($s_unit != '%') {
+    return t("Surcharge of Rs. @s is applicable.", array("@s" => $surcharge));
+  }
+  else {
+    return t("Surcharge of @s is applicable.", array("@s" => $surcharge));
+  }
 }

@@ -27,6 +27,7 @@ function uc_gharpay_payment_method() {
  * Callback for uc_gharpay_payment_method().
  */
 function uc_gharpay_payment_method_callback($op, &$order, $silent = FALSE) {
+
   switch ($op) {
     case 'cart-details':
       // @TODO: return markup not working here.
@@ -48,20 +49,21 @@ function uc_gharpay_payment_method_callback($op, &$order, $silent = FALSE) {
         // Can not make them mandatory through hook_form_alter() as there might be some other payment
         // methods those do not require them.
 
+        try {
         $gharpay = new GpGharpayAPI();
 
         // Get city. Mandatory.
-        $city = !empty($order->delivery_city) ? ($gharpay->isCityPresent($order->delivery_city) == 1 ? $order->delivery_city : NULL) : NULL;
+        $city = !empty($order->billing_city) ? ($gharpay->isCityPresent($order->billing_city) == 1 ? $order->billing_city : NULL) : NULL;
         // Get pincode. Mandatory.
-        $pincode = !empty($order->delivery_postal_code) ? ($gharpay->isPincodePresent($order->delivery_postal_code) == 1 ? $order->delivery_postal_code : NULL) : NULL;
+        $pincode = !empty($order->billing_postal_code) ? ($gharpay->isPincodePresent($order->billing_postal_code) == 1 ? $order->billing_postal_code : NULL) : NULL;
         // Get first name. Mandatory.
-        $first_name = !empty($order->delivery_first_name) ? $order->delivery_first_name : NULL;
+        $first_name = !empty($order->billing_first_name) ? $order->billing_first_name : NULL;
         // Get contact number. Mandatory.
-        $contact_no = !empty($order->delivery_phone) ? $order->delivery_phone : NULL;
+        $contact_no = !empty($order->billing_phone) ? $order->billing_phone : NULL;
         // Get address. Mandatory.
-        $address = !empty($order->delivery_street1) ? $order->delivery_street1 : NULL;
+        $address = !empty($order->billing_street1) ? $order->billing_street1 : NULL;
         // Get country code. Mandatory.
-        $country = !empty($order->delivery_country) ? $order->delivery_country : '';
+        $country = !empty($order->billing_country) ? $order->billing_country : '';
 
         // Check if pincode or city are left out or
         // Gharpay does not have service in that area.
@@ -101,7 +103,7 @@ function uc_gharpay_payment_method_callback($op, &$order, $silent = FALSE) {
           // Check if contact number is all numeric and
           // counts to 10 digits.
           $contact_num_len = strlen($contact_no);
-          if (!is_numeric($contact_no) || $contact_num_len != 10) {
+          if (!is_numeric($contact_no)) {
             drupal_set_message("The phone number seems invalid.", "error");
             return FALSE;
           }
@@ -112,6 +114,12 @@ function uc_gharpay_payment_method_callback($op, &$order, $silent = FALSE) {
           drupal_set_message(t("Gharpay transactions require delivery address."), "error");
           return FALSE;
         }
+      }
+      catch(Exception $e){
+        drupal_set_message($e->getMessage(), "error");
+        watchdog("gharpay", "Exception: $e", NULL, WATCHDOG_ERROR);
+        return FALSE;
+      }
 
       }
       break;
@@ -128,6 +136,7 @@ function uc_gharpay_payment_method_callback($op, &$order, $silent = FALSE) {
 function uc_gharpay_order($op, $order, $arg2) {
   switch ($op) {
     case 'submit':
+    try {
       $gharpay = new GpGharpayAPI();
 
       // Get array of customer details.
@@ -142,6 +151,12 @@ function uc_gharpay_order($op, $order, $arg2) {
       // Do the transaction.
       $create_order = $gharpay->createOrder($customer_details, $order_details, $product_details);
       drupal_set_message(t("Your Gharpay order id is @orderid", array("@orderid" => $create_order['gharpayOrderId'])), "status");
+    }
+    catch(Exception $e) {
+      drupal_set_message($e->getMessage(), "error");
+      watchdog("gharpay", "Exception: $e", NULL, WATCHDOG_ERROR);
+      return array(array('pass' => FALSE));
+    }
       break;
   }
 }

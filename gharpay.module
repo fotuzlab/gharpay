@@ -111,8 +111,8 @@ function gharpay_create_order_client_details($order) {
   // Mandatory fields.
   // Should have already passed validation.
   $array = array(
-      'firstName' => $order->delivery_first_name,
-      'contactNo' => $order->delivery_phone,
+      'firstName' => $order->billing_first_name,
+      'contactNo' => $order->billing_phone,
       'address' => str_replace("<BR />", ",", uc_order_address($order, 'delivery')),
     );
   // These are optional fields.
@@ -120,8 +120,8 @@ function gharpay_create_order_client_details($order) {
   if (!empty($order->primary_email)) {
     $array['email'] = $order->primary_email;
   }
-  if (!empty($order->delivery_last_name)) {
-    $array['lastName'] = $order->delivery_last_name;
+  if (!empty($order->billing_last_name)) {
+    $array['lastName'] = $order->billing_last_name;
   }
   if (!empty($order->prefix)) {
     $array['prefix'] = $order->prefix;
@@ -144,7 +144,7 @@ function gharpay_create_order_order_details($order) {
   // Mandatory fields.
   $array = array(
       // Should have already passed validation.
-      'pincode' => $order->delivery_postal_code,
+      'pincode' => $order->billing_postal_code,
       // Ubercart validation assumed.
       'orderAmount' => $order->order_total,
       // Ubercart validation assumed.

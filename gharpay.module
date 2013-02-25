@@ -113,7 +113,7 @@ function gharpay_create_order_client_details($order) {
   $array = array(
       'firstName' => $order->billing_first_name,
       'contactNo' => $order->billing_phone,
-      'address' => str_replace("<BR />", ",", uc_order_address($order, 'delivery')),
+      'address' => str_replace("<BR />", ",", uc_order_address($order, 'billing')),
     );
   // These are optional fields.
   // They did not go under validation earlier.

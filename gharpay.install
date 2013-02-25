@@ -6,7 +6,7 @@
  */
 
 /**
- * Implementation of hook_requirements().
+ * Implements hook_requirements().
  */
 function gharpay_requirements($phase) {
   if ($phase == 'install' || $phase == 'runtime') {
@@ -24,7 +24,7 @@ function gharpay_requirements($phase) {
 }
 
 /**
- * Implementation of hook_uninstall().
+ * Implements hook_uninstall().
  */
 function gharpay_uninstall() {
   db_query("DELETE FROM {variable} WHERE name like '%gharpay_%'");

@@ -68,6 +68,12 @@ function gharpay_menu() {
     'access arguments' => array('access_gharpay'),
     'type' => MENU_CALLBACK,
   );
+  $items['gharpay/push'] = array(
+    'title' => t('Gharpay push service'),
+    'page callback' => 'gharpay_push_service',
+    'access arguments' => array('access_gharpay'),
+    'type' => MENU_CALLBACK,
+  );
 
   return $items;
 }
@@ -232,5 +238,60 @@ function gharpay_display_surcharge() {
   }
   else {
     return t("Surcharge of @s is applicable.", array("@s" => $surcharge));
+  }
+}
+
+/**
+ * This function is called to invoke Gharpay's push service.
+ * It would update the orders' statuses.
+ */
+function gharpay_push_service() {
+  $params = $_GET;
+  // Check if order_id and client_order_id are present.
+  if ($_GET['order_id'] || $_GET['client_order_id']) {
+    print "Either Order ID or Client Order ID is missing.";
+    exit;
+  }
+  try {
+    $gharpay = new GpGharpayAPI();
+    $push = $gharpay->viewOrderStatus($_GET['order_id']);
+    $client_order_id = $_GET['client_order_id'];
+    $status = strtolower(trim($push['status']));
+
+    // Map Gharpay keys with Ubercart.
+    switch ($status) {
+      case 'On-The-Way':
+        $status = 'processing';
+        break;
+      case 'Delivered':
+        $status = 'completed';
+        break;
+      case 'Failed':
+        $status = 'gharpay_failed';
+        break;
+      case 'Cancelled by Client':
+        $status = 'gharpay_cancelled_by_client';
+        break;
+      case 'Cancelled by Customer':
+        $status = 'gharpay_cancelled_by_customer';
+        break;
+      case 'Deferred by Customer':
+        $status = 'gharpay_deferred_by_client';
+        break;
+      case 'Invalid':
+        $status = 'gharpay_invalid';
+        break;
+    }
+
+    if (function_exists('uc_order_update_status')) {
+      // Update status.
+      $update = uc_order_update_status($client_order_id, $status);
+    }
+    else {
+      print 'ERROR: Function not found: uc_order_update_status';
+    }
+  }
+  catch(Exception $e) {
+    print_r($e);
   }
 }

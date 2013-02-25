@@ -119,7 +119,7 @@ function gharpay_create_order_client_details($order) {
   $array = array(
       'firstName' => $order->billing_first_name,
       'contactNo' => $order->billing_phone,
-      'address' => str_replace("<BR />", ",", uc_order_address($order, 'delivery')),
+      'address' => str_replace("<BR />", ",", uc_order_address($order, 'billing')),
     );
   // These are optional fields.
   // They did not go under validation earlier.
@@ -240,6 +240,7 @@ function gharpay_display_surcharge() {
     return t("Surcharge of @s is applicable.", array("@s" => $surcharge));
   }
 }
+<<<<<<< HEAD
 
 /**
  * This function is called to invoke Gharpay's push service.
@@ -295,3 +296,5 @@ function gharpay_push_service() {
     print_r($e);
   }
 }
+=======
+>>>>>>> 58643c1af66693c4fcfa19f7f426a3c2318e1e59

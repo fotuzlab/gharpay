@@ -6,9 +6,27 @@
  */
 
 /**
+ * Implements hook_requirements().
+ */
+function uc_gharpay_requirements($phase) {
+  if ($phase == 'install' || $phase == 'runtime') {
+    $requirements = array();
+    if (!db_table_exists('uc_order_statuses')) {
+      $requirements['uc_gharpay'] = array(
+          'title' => t("Gharpay for Ubercart"),
+          'description' => t("Table 'uc_order_statuses' is missing in the database. Please install and enable 'Ubercart Order' module before proceeding. If you see it already checked, enable Gharpay for Ubercart again. This error won't show up."),
+          'severity' => REQUIREMENT_ERROR,
+        );
+      return $requirements;
+    }
+  }
+}
+
+/**
  * Implements hook_install().
  */
 function uc_gharpay_install() {
+  if (db_table_exists('uc_order_statuses')) {
   // Add Gharpay related statuses.
   db_query("INSERT INTO {uc_order_statuses} VALUES
       ('gharpay_failed', 'Gharpay failed', 'canceled', 0, 1),
@@ -20,6 +38,7 @@ function uc_gharpay_install() {
       ('gharpay_ontheway', 'Gharpay on the way', 'post_checkout', 1, 1),
       ('gharpay_delivered', 'Gharpay delivered', 'payment_received', 0, 1)
     ");
+  }
 }
 
 /**

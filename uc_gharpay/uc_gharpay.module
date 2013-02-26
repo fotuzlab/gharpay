@@ -150,7 +150,23 @@ function uc_gharpay_order($op, $order, $arg2) {
 
       // Do the transaction.
       $create_order = $gharpay->createOrder($customer_details, $order_details, $product_details);
-      drupal_set_message(t("Your Gharpay order id is @orderid", array("@orderid" => $create_order['gharpayOrderId'])), "status");
+
+      if ($create_order) {
+        $cid = $create_order['clientOrderId'];
+        $gid = $create_order['gharpayOrderId'];
+        // Store Gharpay returned order ID.
+        $save = gharpay_store_transaction(
+          $cid,
+          $gid,
+          'gharpay_pending');
+        drupal_set_message(t("Your Gharpay order id is @orderid", array("@orderid" => $gid)), "status");
+        if (!$save) {
+          watchdog("gharpay", "Failed to store in database: $cid=>$gid", NULL, WATCHDOG_ERROR);
+        }
+      }
+      else {
+        drupal_set_message(t("Something went wrong."), "error");
+      }
     }
     catch(Exception $e) {
       drupal_set_message($e->getMessage(), "error");

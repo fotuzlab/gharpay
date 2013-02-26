@@ -290,11 +290,17 @@ function gharpay_push_service() {
     if (function_exists('uc_order_update_status')) {
       // Update status.
       $update = uc_order_update_status($client_order_id, $status);
+      // Update database
+      $db_update = gharpay_update_transaction($client_order_id, $status);
       if ($update == TRUE) {
         return t("Order $client_order_id updated successfully with status '$status'");
       }
       else {
         return t("Status for order $client_order_id could not be updated.");
+      }
+      // Enter log entry if DB update fails.
+      if ($db_update == FALSE) {
+        watchdog("gharpay", "Failed to store in database: $client_order_id=>$status", NULL, WATCHDOG_ERROR);
       }
     }
     else {
@@ -305,4 +311,116 @@ function gharpay_push_service() {
     drupal_set_message(t("ERROR: $e"), 'error');
     return;
   }
+}
+
+/**
+ * Implements hook_order_pane_alter().
+ */
+function gharpay_order_pane_alter(&$panes) {
+  foreach ($panes as &$pane) {
+    if ($pane['id'] == 'payment') {
+      $pane['callback'] = 'gharpay_uc_order_pane_payment';
+    }
+  }
+}
+
+/**
+ * This function overrides default uc_order_pane_payment function
+ * in ubercart.
+ * We add Gharpay transaction details with the payment here.
+ */
+function gharpay_uc_order_pane_payment($op, $order) {
+  switch ($op) {
+    case 'view':
+      $output = '';
+      if (variable_get('uc_payment_tracking', TRUE)) {
+        $context = array(
+          'revision' => 'formatted-original',
+          'type' => 'amount',
+          'subject' => array(
+            'order' => $order,
+          ),
+        );
+        $output = t('Balance: @balance', array('@balance' => uc_price(uc_payment_balance($order), $context)));
+        $output .= ' ('. l(t('View'), 'admin/store/orders/'. $order->order_id .'/payments') .')<br />';
+      }
+      $method_name = _payment_method_data($order->payment_method, 'review');
+      if (empty($method_name)) {
+        $method_name = _payment_method_data($order->payment_method, 'name');
+      }
+      $output .= t('Method: @payment_method', array('@payment_method' => $method_name));
+      $func = _payment_method_data($order->payment_method, 'callback');
+      if (function_exists($func)) {
+        $method_output = $func('order-view', $order);
+        if (!empty($method_output)) {
+          $output .= '<br />'. $method_output;
+        }
+      }
+
+      // Add Gharpay transaction details.
+      $gp_details = gharpay_get_transaction($order->order_id);
+      if ($gp_details) {
+        $output .= '<br />' . 'Transaction ID: ' . $gp_details->gid;
+        $output .= '<br />' . 'Status: ' . $gp_details->status;
+      }
+
+      return $output;
+      break;
+
+    case 'customer':
+      return uc_order_pane_payment($op, $order);
+      break;
+
+    case 'edit-form':
+      return uc_order_pane_payment($op, $order);
+      break;
+
+    case 'edit-theme':
+      return uc_order_pane_payment($op, $order);
+      break;
+
+    case 'edit-process':
+      return uc_order_pane_payment($op, $order);
+      break;
+  }
+}
+
+/**
+ * Store gharpay transactions.
+ * @param $cid
+ *   Client order ID
+ * @param $gid
+ *   Gharpay order ID
+ * @param $status
+ *   Status of the transaction
+ */
+function gharpay_store_transaction($cid, $gid, $status) {
+  $query = db_query("INSERT INTO {gharpay_transactions} VALUES (%d, '%s', '%s')", $cid, $gid, $status);
+  return $query ? TRUE : FALSE;
+}
+
+/**
+ * Retrieve gharpay transactions.
+ * @param $cid
+ *   Client order ID
+ * @return $result array
+ *   Gharpay order ID and status
+ */
+function gharpay_get_transaction($cid) {
+  $query = db_query("SELECT uos.title AS status, gt.gid AS gid FROM {uc_order_statuses} uos INNER JOIN {gharpay_transactions} gt ON uos.order_status_id=gt.status WHERE gt.cid=%d", $cid);
+  $result = db_fetch_object($query);
+
+  return $result;
+}
+
+/**
+ * Update gharpay transactions.
+ * @param $cid
+ *   Client order ID
+ * @param $status
+ *   Status to update
+ */
+function gharpay_update_transaction($cid, $status) {
+  $query = db_query("UPDATE {gharpay_transactions} SET status = '%s' WHERE cid=%d", $status, $cid);
+  return $query ? TRUE : FALSE;
 }

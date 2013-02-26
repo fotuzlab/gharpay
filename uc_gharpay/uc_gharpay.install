@@ -17,7 +17,7 @@ function uc_gharpay_install() {
       ('gharpay_deferred_by_customer', 'Gharpay deferred by customer', 'canceled', 0, 1),
       ('gharpay_invalid', 'Gharpay invalid', 'canceled', 0, 1),
       ('gharpay_pending', 'Gharpay pending', 'post_checkout', 0, 1),
-      ('gharpay_ontheway', 'Gharpay on the way', 'post_checkout', 0, 1),
+      ('gharpay_ontheway', 'Gharpay on the way', 'post_checkout', 1, 1),
       ('gharpay_delivered', 'Gharpay delivered', 'payment_received', 0, 1)
     ");
 }

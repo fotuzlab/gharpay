@@ -28,4 +28,43 @@ function gharpay_requirements($phase) {
  */
 function gharpay_uninstall() {
   db_query("DELETE FROM {variable} WHERE name like '%gharpay_%'");
+  drupal_uninstall_schema('gharpay');
+}
+
+/**
+ * Implements hook_install().
+ */
+function gharpay_install() {
+  drupal_install_schema('gharpay');
+}
+
+/**
+ * Implements hook_schema().
+ */
+function gharpay_schema() {
+  $schema['gharpay_transactions'] = array(
+    'description' => 'Stores transaction details returned by Gharpay.',
+    'fields' => array(
+      'cid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'Order ID at the client side.',
+      ),
+      'gid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'Transaction ID returned by Gharpay.',
+      ),
+      'status' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'Status of the transaction.',
+      ),
+    ),
+    'primary key' => array('cid'),
+  );
+
+  return $schema;
 }

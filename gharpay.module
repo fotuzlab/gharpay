@@ -358,10 +358,12 @@ function gharpay_uc_order_pane_payment($op, $order) {
       }
 
       // Add Gharpay transaction details.
-      $gp_details = gharpay_get_transaction($order->order_id);
-      if ($gp_details) {
-        $output .= '<br />' . 'Transaction ID: ' . $gp_details->gid;
-        $output .= '<br />' . 'Status: ' . $gp_details->status;
+      if ($order->payment_method == 'gharpay') {
+        $gp_details = gharpay_get_transaction($order->order_id);
+        if ($gp_details) {
+          $output .= '<br />' . 'Transaction ID: ' . $gp_details->gid;
+          $output .= '<br />' . 'Status: ' . $gp_details->status;
+        }
       }
 
       return $output;

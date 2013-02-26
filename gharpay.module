@@ -248,7 +248,7 @@ function gharpay_display_surcharge() {
 function gharpay_push_service() {
   $params = $_GET;
   // Check if order_id and client_order_id are present.
-  if ($_GET['order_id'] || $_GET['client_order_id']) {
+  if (!isset($_GET['order_id']) || !isset($_GET['client_order_id'])) {
     print "Either Order ID or Client Order ID is missing.";
     exit;
   }
